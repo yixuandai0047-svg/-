@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>機車駕照應考練習</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">交通部公路局官方題庫整理</p>
+        <h1>機車駕照應考練習</h1>
+      </div>
+      <nav class="source-links" aria-label="官方來源">
+        <a href="https://www.thb.gov.tw/News_Download.aspx?PageSize=10&amp;n=82&amp;page=1&amp;sms=12823" target="_blank" rel="noreferrer">官方題庫</a>
+        <a href="https://www.mvdis.gov.tw/m3-simulator-drv/index" target="_blank" rel="noreferrer">線上模擬考</a>
+      </nav>
+    </header>
+
+    <main class="app-shell">
+      <aside class="control-panel" aria-label="練習控制">
+        <section class="panel-section">
+          <label class="field-label" for="searchInput">搜尋題目</label>
+          <input id="searchInput" class="text-field" type="search" placeholder="例如：酒駕、行人、標誌" autocomplete="off" />
+        </section>
+
+        <section class="panel-section">
+          <label class="field-label" for="categoryFilter">分類</label>
+          <select id="categoryFilter" class="select-field"></select>
+        </section>
+
+        <section class="panel-section">
+          <span class="field-label">練習範圍</span>
+          <div class="segmented" role="group" aria-label="練習範圍">
+            <button id="allQuestionsButton" class="segment is-active" type="button">全部</button>
+            <button id="wrongBookButton" class="segment" type="button">錯題本</button>
+          </div>
+          <p class="panel-hint">答錯會自動加入錯題本，答對後會自動移除。</p>
+        </section>
+
+        <section class="panel-section">
+          <span class="field-label">出題方式</span>
+          <div class="segmented" role="group" aria-label="出題方式">
+            <button id="orderedModeButton" class="segment is-active" type="button">順序</button>
+            <button id="randomModeButton" class="segment" type="button">隨機</button>
+          </div>
+        </section>
+
+        <section class="panel-section stats-grid" aria-label="本次統計">
+          <div>
+            <span id="answeredCount" class="stat-value">0</span>
+            <span class="stat-label">已答</span>
+          </div>
+          <div>
+            <span id="correctRate" class="stat-value">0%</span>
+            <span class="stat-label">正確率</span>
+          </div>
+          <div>
+            <span id="correctCount" class="stat-value">0</span>
+            <span class="stat-label">答對</span>
+          </div>
+          <div>
+            <span id="filteredCount" class="stat-value">0</span>
+            <span class="stat-label">題數</span>
+          </div>
+          <div>
+            <span id="wrongBookCount" class="stat-value">0</span>
+            <span class="stat-label">錯題</span>
+          </div>
+        </section>
+
+        <section class="panel-section action-stack">
+          <button id="shuffleButton" class="secondary-button" type="button">隨機一題</button>
+          <button id="resetStatsButton" class="ghost-button" type="button">重設統計</button>
+          <button id="clearWrongBookButton" class="ghost-button" type="button">清空錯題本</button>
+        </section>
+      </aside>
+
+      <section class="practice-area" aria-live="polite">
+        <div class="question-toolbar">
+          <div>
+            <span id="questionMeta" class="pill">載入中</span>
+            <span id="questionPosition" class="position-text"></span>
+          </div>
+          <div class="toolbar-actions">
+            <button id="previousButton" class="icon-button" type="button" title="上一題" aria-label="上一題">‹</button>
+            <button id="nextButton" class="primary-button" type="button">下一題</button>
+          </div>
+        </div>
+
+        <article id="questionCard" class="question-card">
+          <div id="emptyState" class="empty-state" hidden>
+            <h2 id="emptyStateTitle">找不到符合條件的題目</h2>
+            <p id="emptyStateText">換個關鍵字或分類後再練習。</p>
+          </div>
+
+          <div id="questionContent">
+            <div id="questionImageWrap" class="question-image-wrap" hidden>
+              <img id="questionImage" class="question-image" alt="" />
+            </div>
+            <h2 id="questionText" class="question-text"></h2>
+            <div id="optionsList" class="options-list"></div>
+            <div id="feedbackBox" class="feedback-box" hidden></div>
+            <div id="videoBox" class="video-box" hidden>
+              <a id="videoLink" target="_blank" rel="noreferrer">開啟官方危險感知影片</a>
+            </div>
+          </div>
+        </article>
+
+        <footer class="source-note">
+          <span id="sourceText"></span>
+        </footer>
+      </section>
+    </main>
+
+    <script src="questions-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
