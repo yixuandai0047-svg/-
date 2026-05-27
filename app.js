@@ -1,5 +1,6 @@
 const questions = Array.isArray(window.OFFICIAL_QUESTIONS) ? window.OFFICIAL_QUESTIONS : [];
 const WRONG_BOOK_KEY = "motorcycle-license-wrong-book";
+const PROGRESS_KEY = "motorcycle-license-progress";
 const questionIds = new Set(questions.map((question) => question.id));
 
 const els = {
@@ -45,6 +46,7 @@ const state = {
   answered: false,
   feedbackNote: "",
   wrongBookIds: loadWrongBookIds(),
+  progressByScope: loadProgressByScope(),
   stats: {
     answered: 0,
     correct: 0,
@@ -73,6 +75,51 @@ function saveWrongBookIds() {
   } catch {
     // The site still works if browser storage is unavailable.
   }
+}
+
+function emptyProgress() {
+  return {
+    all: null,
+    wrongBook: null,
+  };
+}
+
+function loadProgressByScope() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(PROGRESS_KEY) || "{}");
+    const progress = emptyProgress();
+    Object.keys(progress).forEach((scope) => {
+      if (questionIds.has(stored?.[scope])) {
+        progress[scope] = stored[scope];
+      }
+    });
+    return progress;
+  } catch {
+    return emptyProgress();
+  }
+}
+
+function saveProgressByScope() {
+  try {
+    window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(state.progressByScope));
+  } catch {
+    // The site still works if browser storage is unavailable.
+  }
+}
+
+function rememberProgress() {
+  const question = currentQuestion();
+  if (!question || !Object.prototype.hasOwnProperty.call(state.progressByScope, state.scope)) {
+    return;
+  }
+  state.progressByScope[state.scope] = question.id;
+  saveProgressByScope();
+}
+
+function restoreProgressIndex() {
+  const savedId = state.progressByScope[state.scope];
+  const savedIndex = savedId ? state.filtered.findIndex((question) => question.id === savedId) : -1;
+  state.currentIndex = savedIndex >= 0 ? savedIndex : 0;
 }
 
 function searchableText(question) {
@@ -129,9 +176,13 @@ function applyFilters(keepCurrent = false) {
 
   if (keepCurrent && previousId) {
     const nextIndex = state.filtered.findIndex((question) => question.id === previousId);
-    state.currentIndex = nextIndex >= 0 ? nextIndex : 0;
+    if (nextIndex >= 0) {
+      state.currentIndex = nextIndex;
+    } else {
+      restoreProgressIndex();
+    }
   } else {
-    state.currentIndex = 0;
+    restoreProgressIndex();
   }
 
   clearAnswer();
@@ -155,6 +206,7 @@ function setMode(mode) {
 }
 
 function setScope(scope) {
+  rememberProgress();
   state.scope = scope;
   els.allQuestionsButton.classList.toggle("is-active", scope === "all");
   els.wrongBookButton.classList.toggle("is-active", scope === "wrongBook");
@@ -179,6 +231,7 @@ function goToQuestion(index) {
     state.currentIndex = (index + state.filtered.length) % state.filtered.length;
   }
   clearAnswer();
+  rememberProgress();
   render();
 }
 
@@ -226,6 +279,7 @@ function chooseOption(index) {
     saveWrongBookIds();
     state.feedbackNote = wasInWrongBook ? "答錯了。這題會繼續留在錯題本。" : "答錯了。這題已加入錯題本。";
   }
+  rememberProgress();
   render();
 }
 
@@ -374,7 +428,9 @@ function clearWrongBook() {
     return;
   }
   state.wrongBookIds.clear();
+  state.progressByScope.wrongBook = null;
   saveWrongBookIds();
+  saveProgressByScope();
   if (state.scope === "wrongBook") {
     applyFilters(false);
   } else {
@@ -384,9 +440,8 @@ function clearWrongBook() {
 
 function init() {
   populateCategories();
-  setScope("all");
   setMode("ordered");
-  applyFilters();
+  setScope("all");
 
   els.searchInput.addEventListener("input", () => applyFilters(true));
   els.categoryFilter.addEventListener("change", () => applyFilters(false));
