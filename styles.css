@@ -413,9 +413,36 @@ button:disabled {
 .video-box {
   border: 1px solid rgba(62, 95, 159, 0.28);
   background: #eef3ff;
+  padding: 12px;
+}
+
+.video-frame-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(62, 95, 159, 0.28);
+  border-radius: 8px;
+  background: #101820;
+  overflow: hidden;
+}
+
+.video-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #101820;
 }
 
 .video-box a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 12px;
+  padding: 9px 14px;
+  border: 1px solid rgba(62, 95, 159, 0.35);
+  border-radius: 8px;
+  background: #ffffff;
   color: var(--blue);
   font-weight: 900;
 }

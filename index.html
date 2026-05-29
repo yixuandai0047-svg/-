@@ -103,7 +103,17 @@
             <div id="optionsList" class="options-list"></div>
             <div id="feedbackBox" class="feedback-box" hidden></div>
             <div id="videoBox" class="video-box" hidden>
-              <a id="videoLink" target="_blank" rel="noreferrer">開啟官方危險感知影片</a>
+              <div class="video-frame-wrap">
+                <iframe
+                  id="videoFrame"
+                  class="video-frame"
+                  title="官方危險感知影片"
+                  loading="lazy"
+                  allow="fullscreen; autoplay"
+                  allowfullscreen
+                ></iframe>
+              </div>
+              <a id="videoLink" target="_blank" rel="noreferrer">開啟官方影片</a>
             </div>
           </div>
         </article>
