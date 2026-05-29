@@ -100,17 +100,10 @@
               <img id="questionImage" class="question-image" alt="" />
             </div>
             <div id="videoBox" class="video-box" hidden>
-              <div class="video-frame-wrap">
-                <iframe
-                  id="videoFrame"
-                  class="video-frame"
-                  title="官方危險感知影片"
-                  loading="lazy"
-                  allow="fullscreen; autoplay"
-                  allowfullscreen
-                ></iframe>
-              </div>
-              <a id="videoLink" target="_blank" rel="noreferrer">開啟官方影片</a>
+              <a id="videoLink" class="video-open-button" target="_blank" rel="noreferrer">
+                <span class="video-play-mark" aria-hidden="true">▶</span>
+                <span>播放官方影片</span>
+              </a>
             </div>
             <h2 id="questionText" class="question-text"></h2>
             <div id="optionsList" class="options-list"></div>

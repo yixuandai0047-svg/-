@@ -33,7 +33,6 @@ const els = {
   optionsList: document.getElementById("optionsList"),
   feedbackBox: document.getElementById("feedbackBox"),
   videoBox: document.getElementById("videoBox"),
-  videoFrame: document.getElementById("videoFrame"),
   videoLink: document.getElementById("videoLink"),
   sourceText: document.getElementById("sourceText"),
 };
@@ -375,13 +374,9 @@ function renderQuestion(question) {
   }
 
   if (question.videoUrl) {
-    els.videoFrame.src = question.videoUrl;
-    els.videoFrame.title = `${question.id} 官方危險感知影片`;
     els.videoLink.href = question.videoUrl;
     els.videoBox.hidden = false;
   } else {
-    els.videoFrame.removeAttribute("src");
-    els.videoFrame.title = "官方危險感知影片";
     els.videoLink.removeAttribute("href");
     els.videoBox.hidden = true;
   }
