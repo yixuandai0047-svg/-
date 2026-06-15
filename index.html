@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>機車駕照應考練習</title>
-    <link rel="stylesheet" href="styles.css?v=20260529-direct-video" />
+    <link rel="stylesheet" href="styles.css?v=20260615-killer-100" />
   </head>
   <body>
     <header class="app-header">
@@ -32,11 +32,12 @@
 
         <section class="panel-section">
           <span class="field-label">練習範圍</span>
-          <div class="segmented" role="group" aria-label="練習範圍">
+          <div class="segmented is-three" role="group" aria-label="練習範圍">
             <button id="allQuestionsButton" class="segment is-active" type="button">全部</button>
+            <button id="killerButton" class="segment" type="button">殺手題</button>
             <button id="wrongBookButton" class="segment" type="button">錯題本</button>
           </div>
-          <p class="panel-hint">答錯會自動加入錯題本，答對後會自動移除。</p>
+          <p class="panel-hint">殺手題是依公開易錯主題延伸精選；答錯會自動加入錯題本。</p>
         </section>
 
         <section class="panel-section">
@@ -118,6 +119,7 @@
     </main>
 
     <script src="questions-data.js"></script>
-    <script src="app.js?v=20260529-direct-video"></script>
+    <script src="app.js?v=20260615-killer-100"></script>
+    <script src="killer.js?v=20260615-killer-100"></script>
   </body>
 </html>
