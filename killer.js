@@ -1,7 +1,8 @@
 (function () {
   const existingKillerButton = document.getElementById("killerButton");
+  const existingPenaltyButton = document.getElementById("penaltyButton");
 
-  if (existingKillerButton && typeof els !== "undefined" && els.killerButton) {
+  if (typeof els !== "undefined" && els.killerButton && els.penaltyButton) {
     return;
   }
 
@@ -16,6 +17,24 @@
     "H063", "H064", "H065", "H066", "H067", "H080", "H087", "H092", "H093", "H094",
     "H095", "H096", "H105", "H109", "H110", "H111", "H112", "H124", "H125", "M123",
     "M134", "H088", "M245", "M541", "M553", "H009", "M019", "M026", "M482", "M499",
+  ];
+  const penaltyPatterns = [
+    /罰鍰/,
+    /罰款/,
+    /罰金/,
+    /新臺幣/,
+    /新台幣/,
+    /\d+\s*元/,
+    /元以上/,
+    /元以下/,
+    /吊扣/,
+    /吊銷/,
+    /扣牌/,
+    /扣留牌照/,
+    /註銷/,
+    /沒入/,
+    /處罰/,
+    /罰則/,
   ];
 
   const requiredGlobals = [
@@ -38,6 +57,14 @@
   const killerQuestionIds = new Set(
     killerIds.filter((id) => questions.some((question) => question.id === id))
   );
+  const penaltyQuestionIds = new Set(
+    questions
+      .filter((question) => {
+        const text = [question.id, question.category, question.question, ...(question.options || [])].join(" ");
+        return penaltyPatterns.some((pattern) => pattern.test(text));
+      })
+      .map((question) => question.id)
+  );
   const allButton = document.getElementById("allQuestionsButton");
   const wrongBookButton = document.getElementById("wrongBookButton");
   const rangeGroup = allButton && wrongBookButton ? allButton.parentElement : null;
@@ -52,11 +79,30 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .segmented.is-four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
     .segment {
       min-width: 0;
       padding: 8px 8px;
       line-height: 1.25;
       overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 520px) {
+      .segmented.is-four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .segmented.is-four .segment:nth-child(3) {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .segmented.is-four .segment:nth-child(4) {
+        border-top: 1px solid var(--line);
+      }
     }
   `;
   document.head.appendChild(style);
@@ -66,22 +112,35 @@
   killerButton.className = "segment";
   killerButton.type = "button";
   killerButton.textContent = "殺手題";
-  rangeGroup.classList.add("is-three");
+  const penaltyButton = existingPenaltyButton || document.createElement("button");
+  penaltyButton.id = "penaltyButton";
+  penaltyButton.className = "segment";
+  penaltyButton.type = "button";
+  penaltyButton.textContent = "罰則題";
+  rangeGroup.classList.remove("is-three");
+  rangeGroup.classList.add("is-four");
   if (!existingKillerButton) {
     rangeGroup.insertBefore(killerButton, wrongBookButton);
+  }
+  if (!existingPenaltyButton) {
+    rangeGroup.insertBefore(penaltyButton, wrongBookButton);
   }
 
   const hint = rangeGroup.parentElement.querySelector(".panel-hint");
   if (hint) {
-    hint.textContent = "殺手題是依公開易錯主題延伸精選；答錯會自動加入錯題本。";
+    hint.textContent = "殺手題與罰則題是依官方題庫內容整理；答錯會自動加入錯題本。";
   }
 
   els.killerButton = killerButton;
+  els.penaltyButton = penaltyButton;
   if (!state.progressByScope || typeof state.progressByScope !== "object") {
     state.progressByScope = {};
   }
   if (!("killer" in state.progressByScope)) {
     state.progressByScope.killer = null;
+  }
+  if (!("penalty" in state.progressByScope)) {
+    state.progressByScope.penalty = null;
   }
 
   const originalSetScope = setScope;
@@ -100,6 +159,7 @@
       const matchesScope =
         state.scope === "all" ||
         (state.scope === "killer" && killerQuestionIds.has(question.id)) ||
+        (state.scope === "penalty" && penaltyQuestionIds.has(question.id)) ||
         (state.scope === "wrongBook" && state.wrongBookIds.has(question.id));
 
       return matchesCategory && matchesSearch && matchesScope;
@@ -110,27 +170,37 @@
     originalSetScope(scope);
     allButton.classList.toggle("is-active", scope === "all");
     killerButton.classList.toggle("is-active", scope === "killer");
+    penaltyButton.classList.toggle("is-active", scope === "penalty");
     wrongBookButton.classList.toggle("is-active", scope === "wrongBook");
   };
 
   renderStats = function () {
     originalRenderStats();
     killerButton.textContent = `殺手題（${killerQuestionIds.size}）`;
+    penaltyButton.textContent = `罰則題（${penaltyQuestionIds.size}）`;
   };
 
   renderQuestion = function (question) {
     originalRenderQuestion(question);
     const activeQuestion = question || state.filtered[state.currentIndex];
-    if (!activeQuestion || !killerQuestionIds.has(activeQuestion.id)) {
+    if (!activeQuestion) {
       return;
     }
 
-    if (!els.questionMeta.textContent.includes("殺手題")) {
+    if (killerQuestionIds.has(activeQuestion.id) && !els.questionMeta.textContent.includes("殺手題")) {
       els.questionMeta.textContent = `${els.questionMeta.textContent} · 殺手題`;
     }
 
-    if (!els.sourceText.textContent.includes("殺手題精選")) {
+    if (penaltyQuestionIds.has(activeQuestion.id) && !els.questionMeta.textContent.includes("罰則題")) {
+      els.questionMeta.textContent = `${els.questionMeta.textContent} · 罰則題`;
+    }
+
+    if (killerQuestionIds.has(activeQuestion.id) && !els.sourceText.textContent.includes("殺手題精選")) {
       els.sourceText.textContent = `${els.sourceText.textContent} 此題列入殺手題精選，依公開易錯主題延伸整理。`;
+    }
+
+    if (penaltyQuestionIds.has(activeQuestion.id) && !els.sourceText.textContent.includes("罰則題集合")) {
+      els.sourceText.textContent = `${els.sourceText.textContent} 此題列入罰則題集合，依罰鍰金額、吊扣、吊銷等題庫文字整理。`;
     }
   };
 
@@ -139,9 +209,13 @@
     if (state.scope === "killer") {
       els.emptyStateTitle.textContent = "殺手題沒有符合條件的題目";
       els.emptyStateText.textContent = "換個分類或清除搜尋後再試一次。";
+    } else if (state.scope === "penalty") {
+      els.emptyStateTitle.textContent = "罰則題沒有符合條件的題目";
+      els.emptyStateText.textContent = "換個分類或清除搜尋後再試一次。";
     }
   };
 
   killerButton.addEventListener("click", () => setScope("killer"));
+  penaltyButton.addEventListener("click", () => setScope("penalty"));
   renderStats();
 })();
