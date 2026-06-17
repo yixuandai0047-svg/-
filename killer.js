@@ -1,8 +1,9 @@
 (function () {
+  const existingImageButton = document.getElementById("imageButton");
   const existingKillerButton = document.getElementById("killerButton");
   const existingPenaltyButton = document.getElementById("penaltyButton");
 
-  if (typeof els !== "undefined" && els.killerButton && els.penaltyButton) {
+  if (typeof els !== "undefined" && els.imageButton && els.killerButton && els.penaltyButton) {
     return;
   }
 
@@ -57,6 +58,9 @@
   const killerQuestionIds = new Set(
     killerIds.filter((id) => questions.some((question) => question.id === id))
   );
+  const imageQuestionIds = new Set(
+    questions.filter((question) => question.image).map((question) => question.id)
+  );
   const penaltyQuestionIds = new Set(
     questions
       .filter((question) => {
@@ -83,6 +87,10 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
+    .segmented.is-five {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .segment {
       min-width: 0;
       padding: 8px 8px;
@@ -90,23 +98,31 @@
       overflow-wrap: anywhere;
     }
 
-    @media (max-width: 520px) {
-      .segmented.is-four {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .segmented.is-five .segment {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
 
-      .segmented.is-four .segment:nth-child(3) {
-        border-left: 0;
-        border-top: 1px solid var(--line);
-      }
+    .segmented.is-five .segment:nth-child(-n + 2) {
+      border-top: 0;
+    }
 
-      .segmented.is-four .segment:nth-child(4) {
-        border-top: 1px solid var(--line);
-      }
+    .segmented.is-five .segment:nth-child(even) {
+      border-left: 1px solid var(--line);
+    }
+
+    .segmented.is-five .segment:nth-child(5) {
+      grid-column: 1 / -1;
+      border-left: 0;
     }
   `;
   document.head.appendChild(style);
 
+  const imageButton = existingImageButton || document.createElement("button");
+  imageButton.id = "imageButton";
+  imageButton.className = "segment";
+  imageButton.type = "button";
+  imageButton.textContent = "圖片題";
   const killerButton = existingKillerButton || document.createElement("button");
   killerButton.id = "killerButton";
   killerButton.className = "segment";
@@ -118,19 +134,24 @@
   penaltyButton.type = "button";
   penaltyButton.textContent = "罰則題";
   rangeGroup.classList.remove("is-three");
-  rangeGroup.classList.add("is-four");
+  rangeGroup.classList.remove("is-four");
+  rangeGroup.classList.add("is-five");
   if (!existingKillerButton) {
     rangeGroup.insertBefore(killerButton, wrongBookButton);
   }
   if (!existingPenaltyButton) {
     rangeGroup.insertBefore(penaltyButton, wrongBookButton);
   }
+  if (!existingImageButton) {
+    rangeGroup.insertBefore(imageButton, killerButton.parentElement === rangeGroup ? killerButton : wrongBookButton);
+  }
 
   const hint = rangeGroup.parentElement.querySelector(".panel-hint");
   if (hint) {
-    hint.textContent = "殺手題與罰則題是依官方題庫內容整理；答錯會自動加入錯題本。";
+    hint.textContent = "圖片題含標誌、標線與圖示；答錯會自動加入錯題本。";
   }
 
+  els.imageButton = imageButton;
   els.killerButton = killerButton;
   els.penaltyButton = penaltyButton;
   if (!state.progressByScope || typeof state.progressByScope !== "object") {
@@ -138,6 +159,9 @@
   }
   if (!("killer" in state.progressByScope)) {
     state.progressByScope.killer = null;
+  }
+  if (!("image" in state.progressByScope)) {
+    state.progressByScope.image = null;
   }
   if (!("penalty" in state.progressByScope)) {
     state.progressByScope.penalty = null;
@@ -158,6 +182,7 @@
       const matchesSearch = !searchTerm || haystack.includes(searchTerm);
       const matchesScope =
         state.scope === "all" ||
+        (state.scope === "image" && imageQuestionIds.has(question.id)) ||
         (state.scope === "killer" && killerQuestionIds.has(question.id)) ||
         (state.scope === "penalty" && penaltyQuestionIds.has(question.id)) ||
         (state.scope === "wrongBook" && state.wrongBookIds.has(question.id));
@@ -169,6 +194,7 @@
   setScope = function (scope) {
     originalSetScope(scope);
     allButton.classList.toggle("is-active", scope === "all");
+    imageButton.classList.toggle("is-active", scope === "image");
     killerButton.classList.toggle("is-active", scope === "killer");
     penaltyButton.classList.toggle("is-active", scope === "penalty");
     wrongBookButton.classList.toggle("is-active", scope === "wrongBook");
@@ -176,6 +202,7 @@
 
   renderStats = function () {
     originalRenderStats();
+    imageButton.textContent = `圖片題（${imageQuestionIds.size}）`;
     killerButton.textContent = `殺手題（${killerQuestionIds.size}）`;
     penaltyButton.textContent = `罰則題（${penaltyQuestionIds.size}）`;
   };
@@ -187,12 +214,20 @@
       return;
     }
 
+    if (imageQuestionIds.has(activeQuestion.id) && !els.questionMeta.textContent.includes("圖片題")) {
+      els.questionMeta.textContent = `${els.questionMeta.textContent} · 圖片題`;
+    }
+
     if (killerQuestionIds.has(activeQuestion.id) && !els.questionMeta.textContent.includes("殺手題")) {
       els.questionMeta.textContent = `${els.questionMeta.textContent} · 殺手題`;
     }
 
     if (penaltyQuestionIds.has(activeQuestion.id) && !els.questionMeta.textContent.includes("罰則題")) {
       els.questionMeta.textContent = `${els.questionMeta.textContent} · 罰則題`;
+    }
+
+    if (imageQuestionIds.has(activeQuestion.id) && !els.sourceText.textContent.includes("此題含圖片")) {
+      els.sourceText.textContent = `${els.sourceText.textContent} 此題含圖片、標誌、標線或圖示。`;
     }
 
     if (killerQuestionIds.has(activeQuestion.id) && !els.sourceText.textContent.includes("殺手題精選")) {
@@ -206,7 +241,10 @@
 
   renderEmpty = function () {
     originalRenderEmpty();
-    if (state.scope === "killer") {
+    if (state.scope === "image") {
+      els.emptyStateTitle.textContent = "圖片題沒有符合條件的題目";
+      els.emptyStateText.textContent = "換個分類或清除搜尋後再試一次。";
+    } else if (state.scope === "killer") {
       els.emptyStateTitle.textContent = "殺手題沒有符合條件的題目";
       els.emptyStateText.textContent = "換個分類或清除搜尋後再試一次。";
     } else if (state.scope === "penalty") {
@@ -215,6 +253,7 @@
     }
   };
 
+  imageButton.addEventListener("click", () => setScope("image"));
   killerButton.addEventListener("click", () => setScope("killer"));
   penaltyButton.addEventListener("click", () => setScope("penalty"));
   renderStats();
