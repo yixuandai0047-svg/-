@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>機車駕照應考練習</title>
-    <link rel="stylesheet" href="styles.css?v=20260616-penalty" />
+    <link rel="stylesheet" href="styles.css?v=20260617-image" />
   </head>
   <body>
     <header class="app-header">
@@ -32,13 +32,14 @@
 
         <section class="panel-section">
           <span class="field-label">練習範圍</span>
-          <div class="segmented is-four" role="group" aria-label="練習範圍">
+          <div class="segmented is-five" role="group" aria-label="練習範圍">
             <button id="allQuestionsButton" class="segment is-active" type="button">全部</button>
+            <button id="imageButton" class="segment" type="button">圖片題</button>
             <button id="killerButton" class="segment" type="button">殺手題</button>
             <button id="penaltyButton" class="segment" type="button">罰則題</button>
             <button id="wrongBookButton" class="segment" type="button">錯題本</button>
           </div>
-          <p class="panel-hint">殺手題與罰則題是依官方題庫內容整理；答錯會自動加入錯題本。</p>
+          <p class="panel-hint">圖片題含標誌、標線與圖示；答錯會自動加入錯題本。</p>
         </section>
 
         <section class="panel-section">
@@ -120,7 +121,7 @@
     </main>
 
     <script src="questions-data.js"></script>
-    <script src="app.js?v=20260616-penalty"></script>
-    <script src="killer.js?v=20260616-penalty"></script>
+    <script src="app.js?v=20260617-image"></script>
+    <script src="killer.js?v=20260617-image"></script>
   </body>
 </html>
